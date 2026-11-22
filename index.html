@@ -1,106 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Two-Group Gini Calculator</title>
-<style>
-:root { color-scheme: light; font-family: system-ui, -apple-system, Segoe UI, sans-serif; }
-* {box-sizing:border-box}
-body { margin:0; background:#fff; color:#202938; }
-main {max-width:950px;margin:36px auto;padding:0 22px 40px;}
-.production{border:1px solid #dce2e8;border-radius:12px;padding:16px 20px;margin:18px 0 0;background:#f8fafc}.production .equation{text-align:center;font-family:Georgia,serif;font-size:clamp(1.55rem,3.5vw,2.25rem);color:#202938;margin:9px 0}.production .equation sup{font-size:.6em}.production p{font-size:.91rem;margin:6px 0}.production .key{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;font-size:.9rem;color:#536075} h1{font-size:clamp(1.5rem,3.5vw,2rem);margin:0 0 8px} p {line-height:1.5;color:#536075}
-.layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(245px,1fr);gap:24px;margin-top:23px;align-items:start}
-.panel{border:1px solid #dce2e8;border-radius:12px;padding:20px}
-svg{width:100%;height:auto;display:block}
-.controls{display:grid;gap:25px} label{display:flex;justify-content:space-between;gap:12px;font-weight:600;align-items:center}
-input[type=range]{width:100%;margin:12px 0 0;accent-color:#2563a5;cursor:pointer}
-.hint{font-size:.84rem;color:#667085;margin:5px 0 0}
-.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
-.metric{background:#f5f7fa;padding:13px;border-radius:8px}
-.metric b{display:block;font-size:1.6rem;margin-top:4px;font-variant-numeric:tabular-nums}
-.metric small{color:#657285}
-.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.83rem;color:#5d6777;justify-content:center;margin-top:8px}
-.swatch{display:inline-block;width:25px;height:3px;vertical-align:middle;margin-right:6px;background:#2563a5}
-.swatch.dash{background:repeating-linear-gradient(90deg,#717b89 0 6px,transparent 6px 10px)}
-summary{cursor:pointer;font-weight:600}
-footer{margin-top:22px;font-size:.91rem;line-height:1.5}
-@media(max-width:700px){.layout{grid-template-columns:1fr}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Interactive 100-person economy: capital, labor, income distribution and the Gini coefficient.">
+  <title>Capital, Labor & Income Distribution</title>
+  <style>
+    :root{color-scheme:light;--ink:#18263a;--muted:#586579;--line:#dbe3eb;--bg:#f5f7fb;--blue:#2878c8;--green:#228b71;--soft:#f1f5f9}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+    .app{max-width:1430px;margin:24px auto;padding:0 20px}h1{font-size:clamp(23px,2.3vw,32px);margin:0 0 3px;letter-spacing:-.035em}h2{font-size:17px;margin:0 0 10px}p{margin:0}.subtitle,.small,.foot{color:var(--muted)}.subtitle{margin-bottom:17px}.small{font-size:12px}.foot{font-size:12px;margin-top:14px}
+    .card{background:white;border:1px solid var(--line);border-radius:15px;padding:18px;min-width:0}.top{display:grid;grid-template-columns:1fr 1.25fr;gap:14px;margin-bottom:14px}.bottom{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:14px;align-items:start}.right{display:grid;gap:14px}
+    .formula{text-align:center;margin:8px 0;font-family:Georgia,'Times New Roman',serif;font-size:clamp(24px,3vw,35px)}.formula sup{font-size:.58em}.group{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:22px}.range{width:100%;accent-color:var(--blue);cursor:pointer}.label{font-weight:650;font-size:13px}.value{font-weight:750;font-variant-numeric:tabular-nums;font-size:21px}.pill{border-radius:30px;padding:4px 9px;background:var(--soft);font-size:12px;color:var(--muted)}
+    .row{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.legend{display:flex;gap:15px;flex-wrap:wrap;font-size:12px;color:var(--muted)}.legend span{display:inline-flex;gap:6px;align-items:center}.swatch{height:10px;width:10px;border-radius:50%;display:inline-block}.blue{background:var(--blue)}.green{background:var(--green)}
+    .peopleWrap{background:#f8fafc;border-radius:12px;margin-top:12px;padding:13px 6px}.people{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px 1px}.person{display:flex;flex-direction:column;align-items:center;justify-content:start;min-width:0;height:63px;font-variant-numeric:tabular-nums}.person svg{width:23px;height:30px;overflow:visible}.person .amount{font-size:clamp(8px,.9vw,12px);font-weight:700;white-space:nowrap;line-height:16px}.bar{height:5px;width:85%;background:#e3e9f0;border-radius:4px;overflow:hidden;margin-top:2px}.bar>i{height:100%;display:block;border-radius:4px}.person.cap svg,.person.cap .bar>i{color:var(--blue);fill:var(--blue);background:var(--blue)}.person.work svg,.person.work .bar>i{color:var(--green);fill:var(--green);background:var(--green)}
+    .incomeSplit{display:flex;height:34px;border-radius:7px;overflow:hidden;background:#e5edf4;margin:12px 0}.incomeSplit>div{display:flex;align-items:center;justify-content:center;overflow:hidden;font-weight:750;color:white;min-width:0}.incomeSplit .c{background:var(--blue)}.incomeSplit .w{background:var(--green)}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.summary{padding:13px;border-radius:10px;background:var(--soft)}.summary.cap{background:#eaf2fb}.summary.work{background:#e8f5ef}.summary strong{display:block;font-size:23px;font-variant-numeric:tabular-nums}.summary .big{font-size:19px;font-weight:750}.summary label{color:var(--muted);font-size:12px;display:block}.gini{font-size:29px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--blue)}
+    .chart{display:block;width:100%;max-width:520px;margin:4px auto 0}.chart text{font:11px system-ui,-apple-system,Segoe UI,Roboto,sans-serif;fill:var(--muted)}.gridline{stroke:#e1e6ed;stroke-width:1}.axes{stroke:#303d4e;stroke-width:1.6}.equality{stroke:#6f7c90;stroke-width:1.7;stroke-dasharray:6 5}.lorenz{stroke:var(--blue);stroke-width:3.4;fill:none;stroke-linejoin:round}.shade{fill:var(--blue);opacity:.13}.dot{fill:var(--blue)}.insight{background:#eef3f9;border-radius:10px;padding:13px 15px;margin-top:14px;font-size:13px}
+    button{border:1px solid #cbd7e3;border-radius:8px;background:white;color:var(--ink);padding:8px 11px;font-size:12px;font-weight:650;cursor:pointer}button:hover{background:#f0f5f9}button:focus-visible,input:focus-visible{outline:3px solid #83baff;outline-offset:2px}.buttons{display:flex;flex-wrap:wrap;gap:7px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:900px){.app{margin:10px auto;padding:0 10px}.top{grid-template-columns:1fr}.bottom{grid-template-columns:1fr}.person .amount{font-size:11px}}@media(max-width:540px){.controls{grid-template-columns:1fr;gap:9px}.card{padding:12px}.two{gap:6px}.summary{padding:9px}.person{height:58px}.person svg{height:26px;width:21px}.person .amount{font-size:9px}.peopleWrap{padding:10px 2px}}
+    @media print{body{background:#fff}.app{margin:0;max-width:none}.card{break-inside:avoid}.bottom{grid-template-columns:1.1fr .9fr}.top{grid-template-columns:1fr 1.25fr}button{display:none}}
+  </style>
 </head>
 <body>
-<main>
-<h1>Gini Calculator: Capitalists and Workers</h1>
-<p>Two non-overlapping groups. All capitalists have identical incomes; all workers have identical incomes. Capitalists receive only capital income, and workers receive only labor income.</p>
-<section class="production" aria-label="Cobb-Douglas production function">
-<strong>Production function (Cobb–Douglas)</strong>
-<div class="equation">Y = A K<sup id="capitalExponent">0.80</sup> L<sup id="laborExponent">0.20</sup></div>
-<div class="key"><span>Capital income share: α = <b id="capitalShare">80%</b></span><span>Labor income share: 1 − α = <b id="laborShare">20%</b></span></div>
-<p>Under competitive factor markets, with constant returns to scale and factors paid their marginal products, these exponents correspond to the respective shares of total income. The population slider changes who receives that income, not the production function.</p>
-</section>
-<div class="layout">
-<section class="panel" aria-label="Lorenz curve chart">
-<svg viewBox="0 0 480 410" role="img" aria-labelledby="chartTitle chartDesc">
-<title id="chartTitle">Lorenz curve for a two-group income distribution</title>
-<desc id="chartDesc">Perfect equality diagonal and a piecewise linear Lorenz curve controlled by two sliders.</desc>
-<g font-size="12" fill="#596577" text-anchor="end">
-<text x="60" y="352">0%</text><text x="60" y="292">20%</text><text x="60" y="232">40%</text><text x="60" y="172">60%</text><text x="60" y="112">80%</text><text x="60" y="52">100%</text>
-</g>
-<g font-size="12" fill="#596577" text-anchor="middle">
-<text x="70" y="370">0%</text><text x="146" y="370">20%</text><text x="222" y="370">40%</text><text x="298" y="370">60%</text><text x="374" y="370">80%</text><text x="450" y="370">100%</text>
-</g>
-<g stroke="#e5e8ee" stroke-width="1">
-<path d="M70 290H450 M70 230H450 M70 170H450 M70 110H450 M146 50V350 M222 50V350 M298 50V350 M374 50V350"/>
-</g>
-<g stroke="#293344" stroke-width="1.7" fill="none"><path d="M70 50V350H450"/></g>
-<path id="area" d="M70 350L450 50L260 200Z" fill="#2563a5" opacity=".11" />
-<path d="M70 350L450 50" stroke="#717b89" stroke-width="2.2" stroke-dasharray="7 6" fill="none"/>
-<path id="lorenz" d="M70 350L260 200L450 50" stroke="#2563a5" stroke-width="3.4" fill="none" stroke-linejoin="round" />
-<circle id="kink" cx="260" cy="200" r="5" fill="#2563a5" stroke="white" stroke-width="2"/>
-<text x="260" y="400" text-anchor="middle" fill="#293344" font-size="14">Cumulative population share</text>
-<text transform="translate(21 200) rotate(-90)" fill="#293344" text-anchor="middle" font-size="14">Cumulative income share</text>
-</svg>
-<div class="legend"><span><span class="swatch"></span>Lorenz curve</span><span><span class="swatch dash"></span>Perfect equality</span></div>
-</section>
-<section class="panel controls">
-<div><label for="alpha">Capital income share (α) <output id="alphaValue">50%</output></label><input id="alpha" type="range" min="0" max="100" step="1" value="80"/><div class="hint">Labor income share = 100% − α</div></div>
-<div><label for="capitalists">Population who are capitalists <output id="capitalistsValue">50%</output></label><input id="capitalists" type="range" min="1" max="99" step="1" value="10"/><div class="hint">The remaining population are workers (1%–99%).</div></div>
-<div class="metrics"><div class="metric"><small>Gini coefficient</small><b id="gini">0.00</b></div><div class="metric"><small>Gini index (0–100)</small><b id="giniIndex">0</b></div></div>
-<div id="summary" aria-live="polite"></div>
-</section>
-</div>
-<footer>
-<details><summary>Why this works</summary><p>With two non-overlapping groups and equal income within each group, Gini = |α − s|, where α is capital's share of income and s is the capitalist share of the population. The Lorenz curve joins (0,0), the cumulative share of the lower-income group, and (1,1). Income per capita relative to the overall mean is α/s for capitalists and (1−α)/(1−s) for workers. These formulas assume nonnegative incomes. The share of capitalists is limited to 1%–99% so both groups exist.</p></details>
-<p>This is a simplified teaching model, not an empirical estimate of inequality.</p>
-</footer>
+<main class="app">
+  <header><h1>Capital, Labor & Income Distribution</h1><p class="subtitle">Interactive economics dashboard · 100 people share $100 of national income</p></header>
+  <section class="top" aria-label="Production function and model parameters">
+    <div class="card"><div class="small">COBB–DOUGLAS PRODUCTION FUNCTION</div><div class="formula" aria-live="polite">Y = AK<sup id="capitalExponent">0.90</sup>L<sup id="laborExponent">0.10</sup></div><p class="small" style="text-align:center">Capital income share: <strong id="capitalShareText">90%</strong> &nbsp;·&nbsp; Labor income share: <strong id="laborShareText">10%</strong></p><p class="foot">Factor income shares equal output elasticities under competitive factor pricing and constant returns to scale.</p></div>
+    <div class="card"><h2>Explore the economy</h2><div class="controls"><div><div class="group"><label class="label" for="alpha">Capital income share (α)</label><output class="value" id="alphaValue" for="alpha">90%</output></div><input class="range" type="range" id="alpha" min="0" max="100" step="1" value="90"><div class="small">Labor receives the remainder.</div></div><div><div class="group"><label class="label" for="capitalists">Population who are capitalists</label><output class="value" id="capitalistsValue" for="capitalists">39%</output></div><input class="range" type="range" id="capitalists" min="1" max="99" step="1" value="39"><div class="small"><span id="countCapital">39</span> capitalists · <span id="countWorkers">61</span> workers</div></div></div></div>
+  </section>
+  <section class="bottom">
+    <div class="card">
+      <div class="row"><h2>Income among 100 people</h2><button id="sortBtn" type="button" aria-pressed="false">Sort by income</button></div>
+      <div class="legend"><span><i class="swatch blue"></i><span id="capLegend">Capitalists (39)</span></span><span><i class="swatch green"></i><span id="workerLegend">Workers (61)</span></span></div>
+      <div class="peopleWrap"><div id="people" class="people" role="img" aria-label="One hundred people with displayed individual incomes"></div></div>
+      <p class="foot">Each person receives the amount shown below their icon. The small bar compares that person's income with the highest individual income in this economy.</p>
+    </div>
+    <div class="right">
+      <div class="card"><h2>Where does the $100 go?</h2><div class="incomeSplit" aria-label="National income divided between capitalists and workers"><div class="c" id="capitalSplit" style="width:90%">$90</div><div class="w" id="workerSplit" style="width:10%"></div></div><div class="two"><div class="summary cap"><div class="label">Capitalists</div><strong id="capitalTotal">$90</strong><label>Total income</label><div class="big" id="capitalPerPerson">$2.31</div><label>Income per person</label></div><div class="summary work"><div class="label">Workers</div><strong id="workerTotal">$10</strong><label>Total income</label><div class="big" id="workerPerPerson">$0.16</div><label>Income per person</label></div></div></div>
+      <div class="card"><div class="row"><h2>Lorenz curve</h2><div style="text-align:right"><div class="small">Gini coefficient</div><div id="gini" class="gini" aria-live="polite">0.51</div><div class="small">Gini index: <span id="giniIndex">51</span> / 100</div></div></div>
+        <svg id="lorenzSvg" class="chart" viewBox="0 0 370 295" role="img" aria-label="Lorenz curve for the simulated income distribution">
+          <g id="chartGrid"></g><path class="axes" d="M57 24 V244 H344" fill="none"/><path class="equality" d="M57 244 L344 24" fill="none"/><path id="shade" class="shade" d=""/><path id="lorenz" class="lorenz" d=""/><circle id="kink" class="dot" r="4" cx="0" cy="0"/>
+          <text x="201" y="286" text-anchor="middle">Cumulative population share</text><text transform="translate(13 135) rotate(-90)" text-anchor="middle">Cumulative income share</text>
+        </svg>
+        <div class="legend"><span><i style="width:19px;height:3px;background:var(--blue);display:inline-block"></i>Lorenz curve</span><span><i style="width:19px;border-top:2px dashed #6f7c90;display:inline-block"></i>Perfect equality</span></div>
+        <div class="insight" id="insight" aria-live="polite"></div>
+      </div>
+      <div class="buttons"><button type="button" id="equalBtn">Perfect equality example</button><button type="button" id="unequalBtn">High inequality example</button><button type="button" id="resetBtn">Reset</button></div>
+    </div>
+  </section>
+  <p class="foot">Teaching assumptions: capitalists receive only capital income, workers receive only labor income, every person within a group receives the same income, and all income is nonnegative. The two groups are mutually exclusive. Here Gini = |α − s|, where α is the fraction of income paid to capital and s is the fraction of people who are capitalists.</p>
 </main>
 <script>
 'use strict';
-const alphaInput=document.getElementById('alpha');
-const capitalistsInput=document.getElementById('capitalists');
-const els={capitalExponent:document.getElementById('capitalExponent'),laborExponent:document.getElementById('laborExponent'),capitalShare:document.getElementById('capitalShare'),laborShare:document.getElementById('laborShare'),alphaValue:document.getElementById('alphaValue'),capitalistsValue:document.getElementById('capitalistsValue'),gini:document.getElementById('gini'),giniIndex:document.getElementById('giniIndex'),summary:document.getElementById('summary'),area:document.getElementById('area'),lorenz:document.getElementById('lorenz'),kink:document.getElementById('kink')};
+const $ = id => document.getElementById(id);
+const alphaInput = $('alpha');
+const capitalistsInput = $('capitalists');
+let sorted = false;
+const personSvg = '<svg viewBox="0 0 26 34" aria-hidden="true"><circle cx="13" cy="8" r="6"/><rect x="3" y="16" width="20" height="16" rx="7"/></svg>';
 function render(){
- const a=Number(alphaInput.value)/100, s=Number(capitalistsInput.value)/100;
- const g=Math.abs(a-s);
- const capitalistIncome=a/s, workerIncome=(1-a)/(1-s);
- const poorGroup=capitalistIncome<=workerIncome?'capitalists':'workers';
- const p=poorGroup==='capitalists'?s:1-s;
- const income=poorGroup==='capitalists'?a:1-a;
- const x=70+380*p, y=350-300*income;
- els.capitalExponent.textContent=a.toFixed(2); els.laborExponent.textContent=(1-a).toFixed(2); els.capitalShare.textContent=Math.round(a*100)+'%'; els.laborShare.textContent=Math.round((1-a)*100)+'%';
- els.alphaValue.textContent=Math.round(a*100)+'%';
- els.capitalistsValue.textContent=Math.round(s*100)+'%';
- els.gini.textContent=g.toFixed(2);
- els.giniIndex.textContent=(g*100).toFixed(0);
- els.lorenz.setAttribute('d',`M70 350 L${x.toFixed(3)} ${y.toFixed(3)} L450 50`);
- els.area.setAttribute('d',`M70 350 L450 50 L${x.toFixed(3)} ${y.toFixed(3)} Z`);
- els.kink.setAttribute('cx',x.toFixed(3));els.kink.setAttribute('cy',y.toFixed(3));
- let desc=g<1e-10?'Both groups have the same income per person.':`The ${poorGroup} are the lower-income group. They make up ${(p*100).toFixed(0)}% of people and receive ${(income*100).toFixed(0)}% of income.`;
- els.summary.textContent=desc;
+  const alpha = Number(alphaInput.value), capitalists = Number(capitalistsInput.value), workers = 100-capitalists;
+  const capPer = alpha/capitalists, workPer = (100-alpha)/workers;
+  const capIsPoor = capPer <= workPer;
+  const lowPop = capIsPoor ? capitalists : workers;
+  const lowIncome = capIsPoor ? alpha : 100-alpha;
+  const gini = Math.abs(alpha-capitalists)/100;
+  const maxPer = Math.max(capPer, workPer);
+  $('alphaValue').textContent = alpha+'%'; $('capitalistsValue').textContent=capitalists+'%';
+  $('capitalExponent').textContent=(alpha/100).toFixed(2);$('laborExponent').textContent=((100-alpha)/100).toFixed(2);
+  $('capitalShareText').textContent=alpha+'%';$('laborShareText').textContent=(100-alpha)+'%';
+  $('countCapital').textContent=capitalists;$('countWorkers').textContent=workers;
+  $('capLegend').textContent=`Capitalists (${capitalists})`;$('workerLegend').textContent=`Workers (${workers})`;
+  $('capitalTotal').textContent='$'+alpha;$('workerTotal').textContent='$'+(100-alpha);
+  $('capitalPerPerson').textContent='$'+capPer.toFixed(2);$('workerPerPerson').textContent='$'+workPer.toFixed(2);
+  $('capitalSplit').style.width=alpha+'%';$('workerSplit').style.width=(100-alpha)+'%';
+  $('capitalSplit').textContent=alpha>=18?'$'+alpha:'';$('workerSplit').textContent=(100-alpha)>=18?'$'+(100-alpha):'';
+  $('capitalSplit').setAttribute('aria-label',`Capital income: $${alpha}`);
+  $('workerSplit').setAttribute('aria-label',`Labor income: $${100-alpha}`);
+  $('gini').textContent=gini.toFixed(2);$('giniIndex').textContent=String(Math.round(gini*100));
+  let html='';
+  for(let i=0;i<100;i++){
+    const capitalist=sorted?(capIsPoor?i<capitalists:i>=workers):i<capitalists;
+    const amount=capitalist?capPer:workPer;
+    const pct=maxPer===0?0:100*amount/maxPer;
+    html+=`<div class="person ${capitalist?'cap':'work'}" title="${capitalist?'Capitalist':'Worker'}: $${amount.toFixed(4)}" aria-label="${capitalist?'Capitalist':'Worker'}, income $${amount.toFixed(2)}">${personSvg}<span class="amount">$${amount.toFixed(2)}</span><span class="bar"><i style="width:${pct}%"></i></span></div>`;
+  }
+  $('people').innerHTML=html;
+  const x0=57,y0=244,w=287,h=220, xK=x0+w*lowPop/100,yK=y0-h*lowIncome/100;
+  const path=`M ${x0} ${y0} L ${xK} ${yK} L ${x0+w} ${y0-h}`;
+  $('lorenz').setAttribute('d',path);
+  $('shade').setAttribute('d',`M ${x0} ${y0} L ${x0+w} ${y0-h} L ${xK} ${yK} Z`);
+  $('kink').setAttribute('cx',xK);$('kink').setAttribute('cy',yK);
+  $('insight').textContent=gini===0?'Everyone receives the same income per person: perfect income equality.':`The lower-income group is the ${capIsPoor?'capitalists':'workers'}. They represent ${lowPop}% of people but receive ${lowIncome}% of national income. The Gini coefficient is ${gini.toFixed(2)}.`;
 }
-alphaInput.addEventListener('input',render);
-capitalistsInput.addEventListener('input',render);
-render();
+function drawGrid(){
+  let out='';const x0=57,y0=244,w=287,h=220;
+  for(let i=0;i<=5;i++){
+    const p=i/5,x=x0+w*p,y=y0-h*p;
+    out+=`<path class="gridline" d="M${x0} ${y} H${x0+w} M${x} ${y0-h} V${y0}"/>`;
+    out+=`<text x="${x}" y="262" text-anchor="middle">${i*20}%</text><text x="49" y="${y+4}" text-anchor="end">${i*20}%</text>`;
+  }
+  $('chartGrid').innerHTML=out;
+}
+alphaInput.addEventListener('input',render);capitalistsInput.addEventListener('input',render);
+$('sortBtn').addEventListener('click',()=>{sorted=!sorted;$('sortBtn').textContent=sorted?'Group by class':'Sort by income';$('sortBtn').setAttribute('aria-pressed',String(sorted));render()});
+function setExample(a,s){alphaInput.value=a;capitalistsInput.value=s;render()}
+$('equalBtn').addEventListener('click',()=>setExample(50,50));$('unequalBtn').addEventListener('click',()=>setExample(90,10));
+$('resetBtn').addEventListener('click',()=>{sorted=false;$('sortBtn').textContent='Sort by income';$('sortBtn').setAttribute('aria-pressed','false');setExample(90,39)});
+drawGrid();render();
 </script>
 </body>
 </html>
